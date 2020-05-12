@@ -102,66 +102,20 @@ npm install sass-loader --save-dev
 ```js
 module: {
     rules: [
-        {
-            test: /\.sass$/,
-            loaders: ['style', 'css', 'sass']
-        }
+      {
+        test: /\.s[ac]ss$/i,
+        use: [
+          // Creates `style` nodes from JS strings
+          'style-loader',
+          // Translates CSS into CommonJS
+          'css-loader',
+          // Compiles Sass to CSS
+          'sass-loader',
+        ],
+      },
     ]
 }
 ```
 
-* 配置sass全局变量
-
-有一个babel插件可以完美的解决这个问题：`sass-resources-loader`可以访问sass资源任何一个需要访问的sass模块。所以，可以使用共享变量和混合所有SASS样式，而不去每个文件都引用。
-
-    ```
-    npm install --save-dev sass-resources-loader
-    ```
-然后在 build 文件夹下找到 `util.js` 修改`sass`编译器loader的配置，直接把下面的代码复制进去即可：
-
-```
-// 全局文件引入 当然只想编译一个文件的话可以省去这个函数
-    function resolveResource(name) {
-    return path.resolve(__dirname, '../src/style/' + name);
-    }
-    function generateSassResourceLoader() {
-    var loaders = [
-        cssLoader,
-        'sass-loader',
-        {
-        loader: 'sass-resources-loader',
-        options: {
-            // 多个文件时用数组的形式传入，单个文件时可以直接使用 path.resolve(__dirname, '../static/style/common.scss'
-            resources: [resolveResource('theme.scss')]  
-        }
-        }
-        ];
-        if (options.extract) {
-        return ExtractTextPlugin.extract({
-            use: loaders,
-            fallback: 'vue-style-loader'
-        })
-        } else {
-        return ['vue-style-loader'].concat(loaders)
-        }
-    }
-```
-
-将默认的sass配置改为 `generateSassResourceLoader()`
-
-```
-return {
-    css: generateLoaders(),
-    postcss: generateLoaders(),
-    less: generateLoaders('less'),
-    // vue-cli默认sass配置
-    // sass: generateLoaders('sass', { indentedSyntax: true }), 
-    // scss: generateLoaders('sass'),
-    // 新引入的sass-resources-loader
-    sass: generateSassResourceLoader(),
-    scss: generateSassResourceLoader(),
-    stylus: generateLoaders('stylus'),
-    styl: generateLoaders('stylus')
-  }
-```
-改完配置后重启服务就可以在`theme.scss`里定义全局变量并在页面中引用了。引用变量的时候直接引用变量名即可。
+* 引入外部scss文件
+在main.js中引入需要的scss文件
